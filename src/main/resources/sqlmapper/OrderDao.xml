@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.handpay.obm.train.dao.IOrderDao">  
+    
+    <!-- 获取订单ID -->
+    <select id="getOrderID" resultType="Integer" >
+    <![CDATA[
+        select SEQ_TRAIN_ORDER.nextval from DUAL
+    ]]>
+    </select>
+
+    <!-- 查询订单数量 -->  
+    <select id="queryOrderListSize" parameterType="Integer" resultType="Integer" >
+    <![CDATA[
+    	select count(id) from TRAIN_ORDER where user_id = #{userid} and pstatus = '00'
+    ]]>
+    </select>
+
+    <!-- 查询订单列表 -->  
+    <select id="queryOrderList" resultType="com.handpay.obm.train.dao.domain.TrainOrder" >  
+    <![CDATA[
+    	select * from (select A.*, ROWNUM RN from (select * from TRAIN_ORDER where user_id = #{0} and pstatus = '00' order by id desc) 
+    		A where ROWNUM <= #{2} ) where RN >= #{1}
+    ]]>
+    </select>
+    
+    <!-- 查询订单 -->  
+    <select id="queryOrder" resultType="com.handpay.obm.train.dao.domain.TrainOrder" >  
+    <![CDATA[
+    	select * from TRAIN_ORDER where id = #{orderid}
+    ]]>
+    </select>
+    
+    <!-- 查询订单详情列表 -->  
+    <select id="queryOrderDetailList" parameterType="Integer" resultType="com.handpay.obm.train.dao.domain.TrainOrderDetails" >  
+    <![CDATA[
+    	select * from TRAIN_ORDER_DETAILS where order_id = #{orderid}
+    ]]>
+    </select>
+    
+    <!-- 查询订单乘客详情列表 -->  
+    <select id="queryOrderPassengerList" parameterType="Integer" resultType="com.handpay.obm.train.dao.domain.TrainOrderPassengerInfo" >  
+    <![CDATA[
+    	select * from TRAIN_ORDER_PASSENGER_INFO where order_id = #{orderid}
+    ]]>
+    </select>
+    
+    <!-- 插入订单表 -->  
+    <insert id="insertOrder" parameterType="com.handpay.obm.train.dao.domain.TrainOrder" >
+    <![CDATA[
+		insert into TRAIN_ORDER (id, user_id, order_date, ostatus, merchant_code, contact_name, 
+			contact_phone, business_channel, channel, order_amount, promotion_amount, pay_amount, express_send, express_info)
+		values(#{id}, #{user_id}, #{order_date}, #{ostatus}, #{merchant_code}, #{contact_name}, 
+			#{contact_phone}, #{business_channel}, #{channel}, #{order_amount}, #{promotion_amount}, 
+			#{pay_amount}, #{express_send}, #{express_info, jdbcType=VARCHAR})
+    ]]>
+    </insert>
+    
+    <!-- 插入订单详情表 -->
+    <insert id="insertOrderDetail" parameterType="java.util.List">
+
+    <![CDATA[
+        insert into TRAIN_ORDER_DETAILS (id, order_id, order_phone, train_info, 
+        	departure_station, arrive_station, departure_date, departure_time, 
+        	arrive_time, send_type, price, count, product_type, total_time, merchant_order_id, sku_stock_id) SELECT SEQ_TRAIN_ORDER_DETAILS.nextval, A.* FROM( 
+	]]>
+	    <foreach collection="list" item="orderDetail" index="index" separator="union all">  
+            SELECT #{orderDetail.order_id}, 
+            #{orderDetail.order_phone, jdbcType=VARCHAR}, 
+            #{orderDetail.train_info, jdbcType=VARCHAR}, 
+            #{orderDetail.departure_station, jdbcType=VARCHAR}, 
+            #{orderDetail.arrive_station, jdbcType=VARCHAR}, 
+            #{orderDetail.departure_date, jdbcType=VARCHAR}, 
+            #{orderDetail.departure_time, jdbcType=VARCHAR}, 
+            #{orderDetail.arrive_time, jdbcType=VARCHAR}, 
+            #{orderDetail.send_type, jdbcType=VARCHAR}, 
+            #{orderDetail.price,jdbcType=NUMERIC}, 
+            #{orderDetail.count,jdbcType=NUMERIC}, 
+            #{orderDetail.product_type, jdbcType=VARCHAR}, 
+            #{orderDetail.total_time, jdbcType=VARCHAR},
+            #{orderDetail.merchant_order_id, jdbcType=VARCHAR},
+            #{orderDetail.sku_stock_id, jdbcType=VARCHAR}
+            FROM dual
+        </foreach>
+	<![CDATA[
+        ) A
+  	]]>
+    </insert>
+    
+    <!-- 插入订单乘客详情表 -->
+    <insert id="insertOrderPassengerInfo" parameterType="java.util.List">
+    <![CDATA[
+        insert into TRAIN_ORDER_PASSENGER_INFO (id, order_id, passenger_type, 
+			passenger_name, idcard_type, idcard_code, mobile_phone, 
+			seat_name) SELECT SEQ_TRAIN_ORDER_PASSENGER_INFO.nextval, A.* FROM( 
+	]]>
+		<foreach collection="list" item="orderPassengerInfo" index="index" separator="union all"> 
+             SELECT #{orderPassengerInfo.order_id}, #{orderPassengerInfo.passenger_type}, 
+			#{orderPassengerInfo.passenger_name}, #{orderPassengerInfo.idcard_type}, #{orderPassengerInfo.idcard_code}, 
+			#{orderPassengerInfo.mobile_phone}, #{orderPassengerInfo.seat_name} FROM dual  
+        </foreach>
+	<![CDATA[
+        ) A
+  	]]>
+    </insert>
+    
+    <!-- 更新订单表 -->  
+    <update id="updateOrder" parameterType="com.handpay.obm.train.dao.domain.TrainOrder" >
+    <![CDATA[
+    	update TRAIN_ORDER
+    ]]>
+    <set>
+    <if test="ostatus!=null and ostatus!='' ">
+    <![CDATA[
+    	ostatus = #{ostatus},
+    ]]>
+    </if>
+    <if test="pstatus!=null and pstatus!='' ">
+    <![CDATA[
+    	pstatus = #{pstatus},
+    ]]>
+    </if>
+    <if test="dstatus!=null and dstatus!='' ">
+    <![CDATA[
+    	dstatus = #{dstatus},
+    ]]>
+    </if>
+    <if test="merchant_trans_seq!=null and merchant_trans_seq!='' ">
+    <![CDATA[
+    	merchant_trans_seq = #{merchant_trans_seq},
+    ]]>
+    </if>
+        <if test="merchant_trans_date!=null and merchant_trans_date!='' ">
+    <![CDATA[
+    	merchant_trans_date = #{merchant_trans_date},
+    ]]>
+    </if>
+    <if test="payment_trans_seq!=null and payment_trans_seq!='' ">
+    <![CDATA[
+    	payment_trans_seq = #{payment_trans_seq},
+    ]]>
+    </if>
+    <if test="payment_trans_date!=null and payment_trans_date!='' ">
+    <![CDATA[
+    	payment_trans_date = #{payment_trans_date},
+    ]]>
+    </if>
+    <if test="backend_id!=null and backend_id!='' ">
+    <![CDATA[
+    	backend_id = #{backend_id},
+    ]]>
+    </if>
+    <if test="backend_name!=null and backend_name!='' ">
+    <![CDATA[
+    	backend_name = #{backend_name}
+    ]]>
+    </if>
+    </set>  
+    <![CDATA[
+    	where id = #{id}
+	]]>
+    </update>
+    
+    <!-- 更新发货数量 -->
+    <update id="updateSendedAmount"  parameterType="java.util.List">
+		<foreach collection="list" item="trainOrderDetails" index="index" open="begin" close=";end;" separator=";">
+			update TRAIN_ORDER_DETAILS
+        	<set>
+        	sended_amount = #{trainOrderDetails.sended_amount}
+       		</set>
+        	where order_id = #{trainOrderDetails.order_id} and sku_stock_id = #{trainOrderDetails.sku_stock_id}
+       </foreach>
+    </update>
+    
+    <!-- 更新座位号 -->
+    <update id="updateSeatNum"  parameterType="java.util.List">
+ 		<foreach collection="list" item="trainOrderPassengerInfo" index="index" open="begin" close=";end;" separator=";">
+			update TRAIN_ORDER_PASSENGER_INFO
+           	<set>
+            seat_number = #{trainOrderPassengerInfo.seat_number}
+            </set>
+            where order_id = #{trainOrderPassengerInfo.order_id} and passenger_name = #{trainOrderPassengerInfo.passenger_name} and idcard_code = ${trainOrderPassengerInfo.idcard_code}
+       </foreach>
+    </update>
+    
+</mapper>
