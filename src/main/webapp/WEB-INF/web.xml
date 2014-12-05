@@ -14,7 +14,7 @@
 		<session-timeout>30</session-timeout>
 	</session-config>
 	
-	<!-- Spring 刷新Introspector防止内存泄露,必须在ContextLoaderListener之前.-->
+	<!-- Spring 刷新Introspector防止内存泄露,必须在ContextLoaderListener之前  -->
     <listener>
         <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
     </listener>
