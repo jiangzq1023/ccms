@@ -16,18 +16,31 @@
      http://www.springframework.org/schema/context/spring-context-4.1.xsd">
 
 	<!--配置文件导入 -->
+	<!-- <bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>WEB-INF/classes/config.properties</value>
+            </list>
+        </property>
+    </bean> -->
 	<context:property-placeholder location="classpath:config.properties" />
+	<!-- <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+ 		<property name="locations">
+	    <list>
+	      <value>classpath*:config.properties</value>
+	    </list>
+		</property>
+  		<property name="ignoreUnresolvablePlaceholders" value="true"/>
+	</bean> -->
 
 	<!-- 定义上下文返回的消息的国际化。 -->
-	<bean id="messageSource"
+	<!-- <bean id="messageSource"
 		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basename" value="classpath:messages_zh_CN" />
 	</bean>
 	<bean id="localeResolver"
-		class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" />
-
-	<!-- bean扫描加载 -->
-	<context:component-scan base-package="org.govern.ccms" />
+		class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" /> -->
 
 	<!-- 配置DataSource数据源 -->
 	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
@@ -36,9 +49,12 @@
 	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
 		init-method="init" destroy-method="close">
 		<!-- 基本属性 url、user、password -->
-		<property name="url" value="${db.mariadb.jdbc.url}" />
+		<!-- <property name="url" value="${db.mariadb.jdbc.url}" />
 		<property name="username" value="${db.mariadb.jdbc.user}" />
-		<property name="password" value="${db.mariadb.jdbc.password}" />
+		<property name="password" value="${db.mariadb.jdbc.password}" /> -->
+		<property name="url" value="jdbc:mariadb://10.48.194.220:3306/ccms" />
+		<property name="username" value="root" />
+		<property name="password" value="mysqlPassword" />
 
 		<!-- 配置初始化大小、最小、最大 -->
 		<property name="initialSize" value="5" />
@@ -94,4 +110,6 @@
 	<!-- 全注解方式 需加上@Transactional -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
+	<!-- bean扫描加载 -->
+	<context:component-scan base-package="org.govern.ccms" />
 </beans>
