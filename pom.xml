@@ -10,14 +10,15 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<testng.version>6.8.8</testng.version>
-		<junit.version>4.12-beta-3</junit.version>
-		<springframework.version>4.1.3.RELEASE</springframework.version>
+		<testng.version>6.8.13</testng.version>
+		<junit.version>4.12</junit.version>
+		<springframework.version>4.1.4.RELEASE</springframework.version>
 		<security.version>3.2.5.RELEASE</security.version>
 		<mybatis.version>3.2.8</mybatis.version>
 		<mybatis-spring.version>1.2.2</mybatis-spring.version>
 		<shiro.version>1.2.3</shiro.version>
 		<commons-lang3.version>3.3.2</commons-lang3.version>
+		<commons-fileupload.version>1.3.1</commons-fileupload.version>
 		<commons-logging.version>1.2</commons-logging.version>
 		<cglib-nodep.version>3.1</cglib-nodep.version>
 		<gson.version>2.3.1</gson.version>
@@ -25,12 +26,13 @@
 		<javax.el-api.version>3.0.1-b04</javax.el-api.version>
 		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 		<hibernate-validator.version>5.2.0.Alpha1</hibernate-validator.version>
-		<druid.version>1.0.11</druid.version>
+		<druid.version>1.0.13</druid.version>
 		<mysql-connector-java.version>5.1.34</mysql-connector-java.version>
 		<mariadb-java-client.version>1.1.7</mariadb-java-client.version>
-		<jackson.version>2.5.0-rc1</jackson.version>
+		<jackson.version>2.5.0</jackson.version>
 		<velocity-tools.version>2.0</velocity-tools.version>
 		<velocity.version>1.7</velocity.version>
+		<aspectjweaver.version>1.8.4</aspectjweaver.version>
 	</properties>
 
 	<dependencies>
@@ -99,6 +101,9 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- <dependency> <groupId>org.apache.shiro</groupId> <artifactId>shiro-all</artifactId> 
+			<version>${shiro.version}</version> </dependency> <dependency> <groupId>org.apache.shiro</groupId> 
+			<artifactId>shiro-cas</artifactId> <version>${shiro.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-core</artifactId>
@@ -120,6 +125,8 @@
 			<artifactId>shiro-spring</artifactId>
 			<version>${shiro.version}</version>
 		</dependency>
+		<!-- <dependency> <groupId>org.apache.shiro</groupId> <artifactId>shiro-aspectj</artifactId> 
+			<version>${shiro.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-ehcache</artifactId>
@@ -147,6 +154,11 @@
 			<version>${commons-lang3.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>${commons-fileupload.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
 			<version>${cglib-nodep.version}</version>
@@ -168,11 +180,8 @@
 			<version>${javax.servlet-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>${hibernate-validator.version}</version>
-		</dependency>
+		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-validator</artifactId> 
+			<version>${hibernate-validator.version}</version> </dependency> -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>
@@ -230,6 +239,8 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+		<!-- <dependency> <groupId>org.aspectj</groupId> <artifactId>aspectjweaver</artifactId> 
+			<version>${aspectjweaver.version}</version> </dependency> -->
 	</dependencies>
 
 	<!-- <distributionManagement> <repository> <id>nexus-releases</id> <name>Nexus 
@@ -278,16 +289,16 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>8.1.16.v20140903</version>
 				<configuration>
-                    <reload>manual</reload>
-                    <webAppConfig>
-                        <contextPath>/${project.build.finalName}</contextPath>
-                    </webAppConfig>
-                    <connectors>
-                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                            <port>9080</port>
-                            <!--<maxIdleTime>60000</maxIdleTime>-->
-                        </connector>
-                    </connectors>
+					<reload>manual</reload>
+					<webAppConfig>
+						<contextPath>/${project.build.finalName}</contextPath>
+					</webAppConfig>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>9080</port>
+							<!--<maxIdleTime>60000</maxIdleTime> -->
+						</connector>
+					</connectors>
 					<requestLog implementation="org.mortbay.jetty.NCSARequestLog">
 						<filename>./target/yyyy_mm_dd.request.log</filename>
 						<retainDays>90</retainDays>
@@ -295,16 +306,10 @@
 						<extended>false</extended>
 						<logTimeZone>GMT</logTimeZone>
 					</requestLog>
-                </configuration>
-				<!-- <configuration>
-					<contextPath>/ccms</contextPath>
-					<connectors>
-						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-							<port>8080</port>
-							<maxIdleTime>60000</maxIdleTime>
-						</connector>
-					</connectors>
-				</configuration> -->
+				</configuration>
+				<!-- <configuration> <contextPath>/ccms</contextPath> <connectors> <connector 
+					implementation="org.mortbay.jetty.nio.SelectChannelConnector"> <port>8080</port> 
+					<maxIdleTime>60000</maxIdleTime> </connector> </connectors> </configuration> -->
 			</plugin>
 		</plugins>
 	</build>

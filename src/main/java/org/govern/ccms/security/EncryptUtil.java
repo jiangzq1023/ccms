@@ -14,7 +14,7 @@ public class EncryptUtil implements PasswordEncoder{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		EncryptUtil e =new EncryptUtil();
+		EncryptUtil e = new EncryptUtil();
 		System.out.println(e.encode("admin"));
 		System.out.println(e.matches("admin","a65ccfe15418439f1abe1a3940dc0f7c5650698895ab613cbabc219740296b015f816579fcbc5b8c"));
 	}

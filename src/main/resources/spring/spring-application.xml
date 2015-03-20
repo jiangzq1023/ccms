@@ -24,6 +24,7 @@
             </list>
         </property>
     </bean> -->
+    <!-- 加载配置属性文件 -->
 	<context:property-placeholder location="classpath:config.properties" />
 	<!-- <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
  		<property name="locations">
@@ -46,15 +47,15 @@
 	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
 		<property name="jndiName"> <value>java:/handpay</value> </property> </bean> -->
 
+	<!-- bean扫描加载 -->
+	<context:component-scan base-package="org.govern.ccms" />
+	
 	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
 		init-method="init" destroy-method="close">
 		<!-- 基本属性 url、user、password -->
-		<!-- <property name="url" value="${db.mariadb.jdbc.url}" />
+		<property name="url" value="${db.mariadb.jdbc.url}" />
 		<property name="username" value="${db.mariadb.jdbc.user}" />
-		<property name="password" value="${db.mariadb.jdbc.password}" /> -->
-		<property name="url" value="jdbc:mariadb://10.48.194.220:3306/ccms" />
-		<property name="username" value="root" />
-		<property name="password" value="mysqlPassword" />
+		<property name="password" value="${db.mariadb.jdbc.password}" />
 
 		<!-- 配置初始化大小、最小、最大 -->
 		<property name="initialSize" value="5" />
@@ -66,7 +67,9 @@
 
 		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
 		<property name="timeBetweenEvictionRunsMillis" value="60000" />
-
+		<!-- 配置间隔多久定期把监控数据输出到日志中，单位是毫秒 -->
+		<!-- <property name="timeBetweenLogStatsMillis" value="300000" /> -->
+		
 		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
 		<property name="minEvictableIdleTimeMillis" value="300000" />
 
@@ -74,30 +77,28 @@
 		<property name="testWhileIdle" value="true" />
 		<property name="testOnBorrow" value="false" />
 		<property name="testOnReturn" value="false" />
-
-		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 (Oracle使用)
+		
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 (仅Oracle使用)
 		<property name="poolPreparedStatements" value="true" />
 		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" /> -->
 
 		<!-- 配置监控统计拦截的filters，去掉后监控界面sql无法统计 -->
-		<property name="filters" value="stat" />
+		<property name="filters" value="wall,stat,mergeStat,slf4j" />
+		<property name="connectionProperties" value="druid.stat.mergeSql=true,druid.stat.slowSqlMillis=3000" />
 	</bean>
 
 	<!-- 配置SqlSessionFactoryBean -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="configLocation" value="classpath:spring/mybatis-config.xml" />
-		<property name="mapperLocations">
-			<list>
-				<value>classpath:sqlmapper/*.xml</value>
-			</list>
-		</property>
+		<property name="mapperLocations" value="classpath:sqlmapper/*.xml" />
 	</bean>
 
 	<!-- 通过扫描的模式，扫描目录在org.govern.ccms.dao目录下所有的dao -->
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="annotationClass" value="org.springframework.stereotype.Repository" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
 		<property name="basePackage" value="org.govern.ccms.dao" />
+		<property name="annotationClass" value="org.springframework.stereotype.Repository" />
 	</bean>
 
 	<!-- 配置事务管理器，注意这里的dataSource和SqlSessionFactoryBean的dataSource要一致，不然事务就没有作用了 -->
@@ -109,6 +110,7 @@
 	<!-- 全注解方式 需加上@Transactional -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<!-- bean扫描加载 -->
-	<context:component-scan base-package="org.govern.ccms" />
+	<!-- <aop:config expose-proxy="true" proxy-target-class="true" /> -->
+	<!-- <aop:aspectj-autoproxy proxy-target-class="true"/> -->
+	<!-- <aop:aspectj-autoproxy/> -->
 </beans>

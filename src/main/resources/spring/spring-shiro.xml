@@ -17,43 +17,58 @@
 
 	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
-		<property name="successUrl" value="/member/index.htm" />
-		<property name="loginUrl" value="/login.htm" />
-		<property name="unauthorizedUrl" value="/error.htm" />
-		<property name="filters">
+		<property name="successUrl" value="/index.html" />
+		<property name="loginUrl" value="/login.html" />
+		<property name="unauthorizedUrl" value="/error.html" />
+		<!-- <property name="filters">
 			<map>
-				<!-- <entry key="authc" value-ref="shiro"></entry> -->
+				<entry key="authc" value-ref="shiro"></entry>
 			</map>
 		</property>
 		<property name="filterChainDefinitions">
 			<value>
-				<!-- /login.htm=anon
+				/login.htm=anon
 				/submit.htm=anon
 				/error.htm=anon
-				/member/**=authc,roles["member"] -->
+				/member/**=authc,roles["member"]
 			</value>
-		</property>
+		</property> -->
 	</bean>
 	<!-- <bean id="shiro" class="com.cat.shiro.ShiroFilter"></bean> -->
 	
-	<bean id="shiroRealm" class="com.cat.shiro.ShiroRealm" />
-
+	<bean id="ldapRealm" class="org.apache.shiro.realm.ldap.JndiLdapRealm">
+		<!-- 配置登录认证访问ldap的树域 -->
+        <property name="userDnTemplate" value="uid={0},ou=User1,dc=99wuxian,dc=com"/>
+        <property name="contextFactory" ref="contextFactory" />
+    </bean> 
+	<!-- 配置ldap路径及配置一个默认的用户和密码 -->
+     <bean id="contextFactory" class="org.apache.shiro.realm.ldap.JndiLdapContextFactory">
+        <property name="url" value="ldap://180.153.177.112:33389"/>
+        <property name="systemUsername" value="administrator"/>
+        <property name="systemPassword" value="handpay76!"/>
+    </bean> 
+	
 	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
-		<property name="realm" ref="shiroRealm" />
 		<!-- 需要使用cache的话加上这句 -->
-		<property name="cacheManager" ref="shiroEhcacheManager" />
-	</bean>
-
-	<!-- 用户授权信息Cache, 采用EhCache，需要的话就配置上此信息 -->
-	<bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
-		<property name="cacheManagerConfigFile" value="classpath:spring/ehcache.xml" />
+		<property name="cacheManager" ref="shiroCacheManager" />
+		<property name="realm" ref="ldapRealm" />
 	</bean>
 	
+	<!-- 用户授权/认证信息Cache, 采用EhCachrmi集群 -->
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="shiroEhcacheManager"/>
+	</bean>
+	
+	<bean id="shiroEhcacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:spring/ehcache-shiro-rmi.xml" />
+	</bean>
+	
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
 	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
 	
+	<!-- AOP式方法级权限检查  -->
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
 		depends-on="lifecycleBeanPostProcessor">
-		<property name="proxyTargetClass" value="true" />
 	</bean>
 	
 	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
