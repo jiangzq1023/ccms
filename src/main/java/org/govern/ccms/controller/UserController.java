@@ -36,6 +36,7 @@ public class UserController {
 
         try {
             SecurityUtils.getSubject().login(token);
+            logger.info(command.getUsername()+"|µÇÂ¼³É¹¦£¡");
         } catch (AuthenticationException e) {
         	logger.error("Error authenticating.", e);
             errors.reject("error.invalidLogin", "The username or password was not correct.");
