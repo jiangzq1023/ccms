@@ -5,7 +5,8 @@ package org.govern.ccms.entity;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author zqjiang
@@ -58,6 +59,6 @@ public class User implements Serializable{
 	 */
 	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this);
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 }
