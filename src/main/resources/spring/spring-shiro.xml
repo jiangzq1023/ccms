@@ -17,20 +17,22 @@
 
 	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
-		<property name="loginUrl" value="/login.html" />
+		<property name="loginUrl" value="https://www.cas.com/login?service=http://www.example.com/shiro-cas" />
 		<property name="successUrl" value="/index.html" />
 		<property name="unauthorizedUrl" value="/error.html" />
-		<!-- <property name="filters">
+		<property name="filters">
 			<map>
 				<entry key="authc" value-ref="shiro"></entry>
+				<entry key="cas" value-ref="casFilter"></entry>
 			</map>
-		</property> -->
+		</property>
 		<property name="filterChainDefinitions">
 			<value>
 				/login.html=anon
-				/logout.html=anon
 				/error.html=anon
 				/druid/*=anon
+				/shiro-cas = cas
+				/logout = logout
 				/**=authc
 			</value>
 		</property>
@@ -46,21 +48,36 @@
         <property name="url" value="ldap://180.153.177.112:33389"/>
         <property name="systemUsername" value="administrator"/>
         <property name="systemPassword" value="handpay76!"/>
-	</bean> -->
-	
-	
-	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
-		<!-- 需要使用cache的话加上这句 -->
-		<property name="cacheManager" ref="shiroCacheManager" />
-		<property name="realm" ref="jdbcRealm" />
 	</bean>
-	
 	<bean id="jdbcRealm" class="org.apache.shiro.realm.jdbc.JdbcRealm">
         <property name="dataSource" ref="dataSource"/>
         <property name="permissionsLookupEnabled" value="true"/>
         <property name="authenticationQuery" value="select password from rms_user where login_name = ?" />
         <property name="userRolesQuery" value="select r.role_code from rms_role r,rms_user u,rms_user_role ur where r.id = ur.role_id and u.id = ur.user_id and u.login_name = ?"/>
         <property name="permissionsQuery" value="select distinct p.priv_code from rms_privilege p,rms_role r,rms_role_privilege rp where p.id = rp.priv_id and r.id = rp.role_id and r.role_code = ?"/>
+    </bean> -->
+	
+	
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!-- 需要使用cache的话加上这句 -->
+		<property name="cacheManager" ref="shiroCacheManager" />
+		<property name="realm" ref="casRealm" />
+		<property name="subjectFactory" ref="casSubjectFactory"/>
+	</bean>
+	
+	<bean id="casFilter" class="org.apache.shiro.cas.CasFilter">  
+        <!-- 配置验证错误时的失败页面  -->  
+        <property name="failureUrl" value="/error.jsp"/>  
+    </bean>
+    
+    <!-- 如果要实现cas的remember me的功能，需要用到下面这个bean，并设置到securityManager的subjectFactory中 -->  
+    <bean id="casSubjectFactory" class="org.apache.shiro.cas.CasSubjectFactory"/> 
+	
+	<!-- 定制自己的casRealm -->
+	<bean id="casRealm" class="org.apache.shiro.cas.CasRealm">
+        <property name="defaultRoles" value="ROLE_USER"/>
+        <property name="casServerUrlPrefix" value="https://server.cas.com/"/>
+        <property name="casService" value="http://application.examples.com/shiro-cas" />
     </bean>
 	
 	<!-- 用户授权/认证信息Cache, 采用EhCachrmi集群 -->
@@ -75,6 +92,11 @@
 	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
 	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
 	
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">  
+        <property name="staticMethod" value="org.apache.shiro.SecurityUtils.setSecurityManager"/>  
+        <property name="arguments" ref="securityManager"/>  
+    </bean>
+    
 	<!-- AOP式方法级权限检查  , 通过代理进行控制 -->
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
 		depends-on="lifecycleBeanPostProcessor">
